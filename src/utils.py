@@ -5,6 +5,8 @@ import dill
 
 import numpy as np 
 import pandas as pd 
+from sklearn.model_selection import GridSearchCV
+from  sklearn.metrics import r2_score
 
 
 def save_object(file_path, obj):
@@ -18,3 +20,45 @@ def save_object(file_path, obj):
             
     except Exception as e:
         raise CustomException(e,sys)
+    
+ 
+def evaluate_models(X_train, y_train, X_test, y_test, models, param):
+    try:
+        report = {}
+
+        for model_name, model in models.items():
+
+            # ✅ CATBOOST (no GridSearch)
+            if model_name == "CatBoosting Regressor":
+                model.fit(X_train, y_train)
+                y_test_pred = model.predict(X_test)
+                report[model_name] = r2_score(y_test, y_test_pred)
+                models[model_name] = model
+                continue
+
+            # ✅ SKLEARN MODELS
+            gs = GridSearchCV(
+                model,
+                param_grid=param[model_name],
+                cv=3,
+                scoring="r2",
+                error_score="raise"
+            )
+
+            gs.fit(X_train, y_train)
+
+            best_model = gs.best_estimator_
+
+            y_test_pred = best_model.predict(X_test)
+            report[model_name] = r2_score(y_test, y_test_pred)
+
+            # 🔥 IMPORTANT: update model with fitted model
+            models[model_name] = best_model
+
+        return report
+
+    except Exception as e:
+        raise CustomException(e, sys)
+
+
+    
