@@ -28,7 +28,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
 
         for model_name, model in models.items():
 
-            # ✅ CATBOOST (no GridSearch)
+            
             if model_name == "CatBoosting Regressor":
                 model.fit(X_train, y_train)
                 y_test_pred = model.predict(X_test)
@@ -36,7 +36,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
                 models[model_name] = model
                 continue
 
-            # ✅ SKLEARN MODELS
+            
             gs = GridSearchCV(
                 model,
                 param_grid=param[model_name],
@@ -52,7 +52,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
             y_test_pred = best_model.predict(X_test)
             report[model_name] = r2_score(y_test, y_test_pred)
 
-            # 🔥 IMPORTANT: update model with fitted model
+            
             models[model_name] = best_model
 
         return report
